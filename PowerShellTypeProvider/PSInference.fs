@@ -47,20 +47,12 @@ let buildResultType possibleTypes =
     | 7 -> typedefof<Choice<_,_,_,_,_,_,_>>.MakeGenericType(tys)
     | _ -> failwithf "Unexpected number of result types '%d'" (tys.Length) //listOfTy typeof<PSObject>
 
-let getParameterProperties (cmdlet:CmdletConfigurationEntry) =
+let getParameterProperties (cmdlet: CmdletConfigurationEntry) =
     cmdlet.ImplementingType.GetProperties()
-    |> Seq.map (fun p ->
-            let paramAttr = 
-                p.GetCustomAttributes(false)
-                |> Seq.tryFind (fun a -> (a :? ParameterAttribute))
-            match paramAttr with
-            | None -> None
-            | Some(attr) ->
-                Some(p.Name, p.PropertyType)//, ((attr :?> ParameterAttribute).Mandatory))
-        )
-    |> Seq.filter Option.isSome
-    |> Seq.map Option.get
-    |> Seq.toArray
+    |> Array.choose (fun p ->
+         if p.GetCustomAttributes (typeof<ParameterAttribute>, false) |> Array.isEmpty
+         then None
+         else Some (p.Name, p.PropertyType))
 
 let toCamelCase s =
     if (String.IsNullOrEmpty(s) || not <| Char.IsLetter(s.[0]) || Char.IsLower(s.[0]))
