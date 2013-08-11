@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PowerShellTypeProvider", "PowerShellTypeProvider\PowerShellTypeProvider.fsproj", "{DC63F3ED-1289-46AC-9690-2955AC079E94}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PowerShellTypeProvider.ExternalRuntime", "PowerShellTypeProvider.ExternalRuntime\PowerShellTypeProvider.ExternalRuntime.fsproj", "{73D892EB-2A2A-44A5-9517-F6746FF49103}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{DC63F3ED-1289-46AC-9690-2955AC079E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC63F3ED-1289-46AC-9690-2955AC079E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC63F3ED-1289-46AC-9690-2955AC079E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73D892EB-2A2A-44A5-9517-F6746FF49103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73D892EB-2A2A-44A5-9517-F6746FF49103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73D892EB-2A2A-44A5-9517-F6746FF49103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73D892EB-2A2A-44A5-9517-F6746FF49103}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

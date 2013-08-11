@@ -10,6 +10,7 @@ open Samples.FSharp.ProvidedTypes
 open Microsoft.FSharp.Core.CompilerServices
 open System.Management.Automation
 open System.Management.Automation.Runspaces
+open FSPowerShell.PSRuntime
 
 
 [<TypeProvider>]
@@ -20,28 +21,28 @@ type public PowerShellTypeProvider(cfg:TypeProviderConfig) as this =
     let asm =  System.Reflection.Assembly.GetExecutingAssembly()
     let ns = "FSharp.PowerShell"
     let baseTy = typeof<obj>
-    let staticParams = [ProvidedStaticParameter("PSSnapIns", typeof<string>)]//, parameterDefaultValue = "")] // String list will be much better here
+    let staticParams = [ProvidedStaticParameter("PSSnapIns", typeof<string>); //, parameterDefaultValue = "")] // String list will be much better here
+                        ProvidedStaticParameter("Is64BitRequired", typeof<bool>);]
 
     // Expose all available cmdlets as methods
     let shell = ProvidedTypeDefinition(asm, ns, "PowerShellTypeProvider", Some(baseTy))
     let helpText =
         """<summary>Typed representation of a PowerShell runspace</summary>
-           <param name='PSSnapIns'>List of PSSnapIn that will be added at the start separated by semicolon.</param>"""
+           <param name='PSSnapIns'>List of PSSnapIn that will be added at the start separated by semicolon.</param>
+           <param name='Is64BitRequired'>Mark that 64bit runtime should be used for PowerShell</param>"""
     do shell.AddXmlDoc helpText
     do shell.DefineStaticParameters(
         parameters=staticParams,
         instantiationFunction=(fun typeName parameterValues ->
-            let psSnapIns = 
-                match parameterValues with 
-                | [| :? (string) as x |] -> x
-                | _ -> failwith "Unexpected parameter values in DefineStaticParameters"
+            let psSnapIns = parameterValues.[0] :?> string
+            let is64bitRequired = parameterValues.[1] :?> bool
 
             let pty = ProvidedTypeDefinition(asm, ns, typeName, Some(baseTy))
             pty.AddMembersDelayed(fun() ->
-               [let runtime = PSRuntime.Current(psSnapIns.Split(';'))
-                for cmdlet in runtime.AllCmdlets do
+               [let runtime = Manager.Current(psSnapIns.Split(';'), is64bitRequired, true)
+                for cmdlet in runtime.AllCmdlets() do
                     let paramList = 
-                       [for (name, ty) in cmdlet.ParameterProperties ->
+                       [for (name, ty) in cmdlet.ParametersInfo ->
                             let newTy, defValue = 
                                 match ty with
                                 | _ when ty = typeof<System.Management.Automation.SwitchParameter>->
@@ -67,8 +68,8 @@ type public PowerShellTypeProvider(cfg:TypeProviderConfig) as this =
                                     let namedArgs = Quotations.Expr.NewArray(typeof<obj>, namedArgs)
                                     let rawName = cmdlet.RawName;
                                     
-                                    <@@ PSRuntime.Current(psSnapIns.Split(';'))
-                                                 .Execute(rawName, (%%namedArgs : obj[])) @@>)
+                                    <@@ Manager.Current(psSnapIns.Split(';'), is64bitRequired, false)
+                                               .Execute(rawName, (%%namedArgs : obj[])) @@>)
                     pm.AddXmlDocDelayed(fun() ->runtime.GetXmlDoc(cmdlet.RawName))
                     yield pm :> MemberInfo
                ])
