@@ -14,8 +14,7 @@ type PSCommandLet =
         ParametersInfo    : (string*Type)[]
     }
 
-
-let getOutputTypes (cmdlet:CmdletConfigurationEntry) =
+let private getOutputTypesBasedOnTheAttributes(cmdlet:CmdletConfigurationEntry) =
     let types =
         cmdlet.ImplementingType.GetCustomAttributes(false) 
         |> Seq.filter (fun x-> x :? OutputTypeAttribute)
@@ -26,13 +25,36 @@ let getOutputTypes (cmdlet:CmdletConfigurationEntry) =
             |> Array.append state
             ) [||]
     match types with
-    | [||] // Cmlets without declared OutputType may return values
-        -> [|typeof<PSObject>|] 
     | _ when types |> Seq.exists (fun x -> x = null) // OutputTypeAttribute instantiated by string[]
-        -> [|typeof<PSObject>|] 
-    | _ when types.Length > 7
-        -> [|typeof<PSObject>|] 
-    | _ -> types |> Array.rev
+        -> None 
+    | _ when 0 < types.Length && types.Length <= 7
+        -> types |> Array.rev |> Some
+    | _ -> None
+
+let private getOutputTypesFromSharePointCmdlets(cmdlet:CmdletConfigurationEntry) =
+    let baseTy = cmdlet.ImplementingType.BaseType
+    let isSPassembly = 
+        [|"Microsoft.Office.Server.Search.PowerShell"; "Microsoft.SharePoint.PowerShell"|]
+        |> Seq.map (fun namePref -> baseTy.FullName.StartsWith(namePref))
+        |> Seq.fold (fun state value -> state || value) false
+    if (not <| isSPassembly) then None
+    else
+        match baseTy.GenericTypeArguments with
+        | [|x|] -> Some([|x|])
+        | _ -> None
+
+let getOutputTypes (cmdlet:CmdletConfigurationEntry) =
+    let resultType =
+        [getOutputTypesBasedOnTheAttributes;
+         getOutputTypesFromSharePointCmdlets]
+        |> List.map (fun f-> f cmdlet)
+        |> List.fold (fun state x ->
+            match state, x with
+            | (Some(_),_) -> state
+            | _ -> x
+        ) None
+    defaultArg resultType [|typeof<PSObject>|]
+
 
 let buildResultType possibleTypes = 
     let listOfTy ty = typedefof<list<_>>.MakeGenericType([|ty|])
@@ -72,15 +94,6 @@ let getTypeOfObjects (types:Type[]) (collection:PSObject seq) =
         let receivedTypes = collection |> Seq.map (fun o -> o.GetType().FullName) |> Seq.toArray
         failwithf "Output types are ambiguous:'%A'\n\tExpected types:'%A'\n\tReceived types:'%A'" 
             x expectedTypes receivedTypes
-
-    //let types = 
-    //    collection |> Seq.fold (fun state o ->
-    //        state |> Set.add (o.BaseObject.GetType().ToString())
-    //    ) (Set.empty)
-    //match (types |> Set.toList) with
-    //| [ty] -> (collection |> Seq.head).BaseObject.GetType()
-    //| [] -> typeof<PSObject>
-    //| x -> failwithf "Collection is heterogeneous:'%A'" x
 
 type CollectionConverter<'T> =
     static member Convert (objSeq:obj seq) = 
