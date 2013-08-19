@@ -1,9 +1,9 @@
 F# Type Provider for PowerShell
 ======================
 
-Requirements
+Requirements:
 
-- .NET 4.0+
+- .NET 4.5
 - PowerShell 3.0
 
 Related posts:
@@ -12,17 +12,21 @@ Related posts:
 
 #### "SharePoint 2013 Management" Sample ####
 
+Install using the [NuGet package](https://www.nuget.org/packages/PowerShellTypeProvider/).
+
 ```fsharp
 #r "System.Management.Automation.dll"
 #r "Microsoft.SharePoint.PowerShell.dll"
 #r "System.ServiceModel.dll"
-#r "PowerShellTypeProvider.dll"
+#r "Microsoft.Sharepoint.dll"
+#r @"..\packages\PowerShellTypeProvider.0.2.1-alpha\lib\net45\PowerShellTypeProvider.dll"
 
 type PS = FSharp.PowerShell.PowerShellTypeProvider<
-				PSSnapIns="Microsoft.SharePoint.PowerShell", 
-				Is64BitRequired=true >
+					PSSnapIns="Microsoft.SharePoint.PowerShell", 
+					Is64BitRequired=true >
 
-PS.``Get-SPTimerJob``()
+let jobs      = PS.``Get-SPTimerJob``()
+let databases = PS.``Get-SPDatabase``()
 ```
 
 

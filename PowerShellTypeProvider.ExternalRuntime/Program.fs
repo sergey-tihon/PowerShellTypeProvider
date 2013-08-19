@@ -6,6 +6,11 @@ open System.ServiceModel.Description
 
 [<EntryPoint>]
 let main argv = 
+    if (Environment.Version.Major < 4)
+        then failwith ".NET runtime should be version 4+"
+    if (not <| Environment.Is64BitProcess)
+        then failwith "Process should be 64bit"
+
     let snapIns = argv
     let psRuntimeService = PSRuntimeService(snapIns)
     let serviceHost = 
