@@ -3,4 +3,4 @@
 
 type PS = FSharp.PowerShell.PowerShellTypeProvider< PSSnapIns="", Is64BitRequired=false >
 
-PS.``Get-Item``()
+PS.``Get-Item`` [|@"C:\"|]
