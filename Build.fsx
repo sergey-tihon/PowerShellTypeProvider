@@ -5,7 +5,7 @@ open Fake.AssemblyInfoFile
 
 // Assembly / NuGet package properties
 let projectName = "PowerShellProvider"
-let version = "0.2.2"
+let version = "0.3.0"
 let projectSummary = "An F# Type Provider providing strongly typed access to PowerShell cmdlets."
 let projectDescription = "An F# type provider for interoperating with PowerShell"
 let authors = ["Sergey Tihon"]

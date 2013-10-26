@@ -4,3 +4,5 @@
 type PS = FSharp.PowerShell.PowerShellTypeProvider< PSSnapIns="", Is64BitRequired=false >
 
 PS.``Get-Item`` [|@"C:\"|]
+
+PS.``Get-Process``(name = [|"Notepad"|])

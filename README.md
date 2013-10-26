@@ -19,7 +19,7 @@ Install using the [NuGet package](https://www.nuget.org/packages/PowerShellTypeP
 #r "Microsoft.SharePoint.PowerShell.dll"
 #r "System.ServiceModel.dll"
 #r "Microsoft.Sharepoint.dll"
-#r @"..\packages\PowerShellTypeProvider.0.2.1-alpha\lib\net45\PowerShellTypeProvider.dll"
+#r @"..\packages\PowerShellTypeProvider.0.3.0\lib\net45\PowerShellTypeProvider.dll"
 
 type PS = FSharp.PowerShell.PowerShellTypeProvider<
 					PSSnapIns="Microsoft.SharePoint.PowerShell", 

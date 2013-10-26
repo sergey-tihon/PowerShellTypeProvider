@@ -53,7 +53,9 @@ let getOutputTypes (cmdlet:CmdletConfigurationEntry) =
             | (Some(_),_) -> state
             | _ -> x
         ) None
-    defaultArg resultType [|typeof<PSObject>|]
+    Array.append
+        (defaultArg resultType Array.empty)
+        [|typeof<PSObject>|]
 
 
 let buildResultType possibleTypes = 
@@ -87,13 +89,7 @@ let getTypeOfObjects (types:Type[]) (collection:PSObject seq) =
             collection |> Seq.map(fun x->x.BaseObject) |> Seq.forall (ty.IsInstanceOfType))
     match applicableTypes with
     | [|ty|] -> ty
-    | [||] when types=[|typeof<PSObject>|] ->
-        typeof<PSObject>
-    | x      -> 
-        let expectedTypes = types |> Array.map (fun ty -> ty.FullName)
-        let receivedTypes = collection |> Seq.map (fun o -> o.GetType().FullName) |> Seq.toArray
-        failwithf "Output types are ambiguous:'%A'\n\tExpected types:'%A'\n\tReceived types:'%A'" 
-            x expectedTypes receivedTypes
+    | _ -> typeof<PSObject>
 
 type CollectionConverter<'T> =
     static member Convert (objSeq:obj seq) = 
