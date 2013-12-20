@@ -1,10 +1,8 @@
 F# Type Provider for PowerShell
 ======================
-
-Requirements:
-
-- .NET 4.5
-- PowerShell 3.0
+**
+This project is depreciated. Source code were merged into [Fsharp.Management](https://github.com/forki/FSharp.Management)
+**
 
 Related posts:
 
